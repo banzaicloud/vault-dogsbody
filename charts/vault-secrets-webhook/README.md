@@ -110,29 +110,38 @@ You can read more information on how to add firewall rules for the GKE control p
 
 The following tables lists configurable parameters of the vault-secrets-webhook chart and their default values:
 
-| Parameter                        | Description                                                                  | Default                             |
-| -------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------- |
-| affinity                         | affinities to use                                                            | `{}`                                |
-| debug                            | debug logs for webhook                                                       | `false`                             |
-| image.pullPolicy                 | image pull policy                                                            | `IfNotPresent`                      |
-| image.repository                 | image repo that contains the admission server                                | `banzaicloud/vault-secrets-webhook` |
-| image.tag                        | image tag                                                                    | `0.5.1`                             |
-| image.imagePullSecrets           | image pull secrets for private repositories                                  | `[]`                                |
-| namespaceSelector                | namespace selector to use, will limit webhook scope                          | `{}`                                |
-| nodeSelector                     | node selector to use                                                         | `{}`                                |
-| podAnnotations                   | extra annotations to add to pod metadata                                     | `{}`                                |
-| replicaCount                     | number of replicas                                                           | `2`                                 |
-| resources                        | resources to request                                                         | `{}`                                |
-| service.externalPort             | webhook service external port                                                | `443`                               |
-| service.name                     | webhook service name                                                         | `vault-secrets-webhook`             |
-| service.type                     | webhook service type                                                         | `ClusterIP`                         |
-| tolerations                      | tolerations to add                                                           | `[]`                                |
-| rbac.enabled                     | use rbac                                                                     | `true`                              |
-| rbac.psp.enabled                 | use pod security policy                                                      | `false`                             |
-| env.VAULT_IMAGE                  | vault image                                                                  | `vault:latest`                      |
-| env.VAULT_ENV_IMAGE              | vault-env image                                                              | `banzaicloud/vault-env:latest`      |
-| volumes                          | extra volume definitions                                                     | `[]`                                |
-| volumeMounts                     | extra volume mounts                                                          | `[]`                                |
-| configMapMutation                | enable injecting values from Vault to ConfigMaps                             | `false`                             |
-| podDisruptionBudget.enabled      | Enable PodDisruptionBudget for Kong                                          | `false`                             |
-| podDisruptionBudget.minAvailable | Represents the number of Pods that must be available (integer or percentage) | `1`                                 |
+| Parameter                                | Description                                                                  | Default                             |
+| ---------------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------- |
+| affinity                                 | affinities to use                                                            | `{}`                                |
+| debug                                    | debug logs for webhook                                                       | `false`                             |
+| image.pullPolicy                         | image pull policy                                                            | `IfNotPresent`                      |
+| image.repository                         | image repo that contains the admission server                                | `banzaicloud/vault-secrets-webhook` |
+| image.tag                                | image tag                                                                    | `0.5.1`                             |
+| image.imagePullSecrets                   | image pull secrets for private repositories                                  | `[]`                                |
+| namespaceSelector                        | namespace selector to use, will limit webhook scope                          | `{}`                                |
+| nodeSelector                             | node selector to use                                                         | `{}`                                |
+| podAnnotations                           | extra annotations to add to pod metadata                                     | `{}`                                |
+| replicaCount                             | number of replicas                                                           | `2`                                 |
+| resources                                | resources to request                                                         | `{}`                                |
+| service.externalPort                     | webhook service external port                                                | `443`                               |
+| service.name                             | webhook service name                                                         | `vault-secrets-webhook`             |
+| service.type                             | webhook service type                                                         | `ClusterIP`                         |
+| tolerations                              | tolerations to add                                                           | `[]`                                |
+| rbac.enabled                             | use rbac                                                                     | `true`                              |
+| rbac.psp.enabled                         | use pod security policy                                                      | `false`                             |
+| env.VAULT_IMAGE                          | vault image                                                                  | `vault:latest`                      |
+| env.VAULT_ENV_IMAGE                      | vault-env image                                                              | `banzaicloud/vault-env:latest`      |
+| volumes                                  | extra volume definitions                                                     | `[]`                                |
+| volumeMounts                             | extra volume mounts                                                          | `[]`                                |
+| configMapMutation                        | enable injecting values from Vault to ConfigMaps                             | `false`                             |
+| podDisruptionBudget.enabled              | enable PodDisruptionBudget for Kong                                          | `false`                             |
+| podDisruptionBudget.minAvailable         | represents the number of Pods that must be available (integer or percentage) | `1`                                 |
+| metrics.enabled                          | enable serving metrics                                                       | `false`                             |
+| metrics.port                             | port to serving metrics                                                      | `8444`                              |
+| metrics.serviceMonitor.enabled           | enable monitoring via Prometheus Operator (`metrics.enabled` must be `true`) | `false`                             |
+| metrics.serviceMonitor.scheme            | HTTP scheme to use for scraping                                              | `https`                             |
+| metrics.serviceMonitor.tlsConfig         | TLS configuration to use when scraping the endpoint                          | `{insecureSkipVerify: true}`        |
+| metrics.serviceMonitor.scrapeInterval    | interval between consecutive scrapes                                         | `30s`                               |
+| metrics.serviceMonitor.metricRelabelings | [MetricRelabelConfigs](https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#relabelconfig) to apply to samples before ingestion                    | `[]`                                |
+| metrics.serviceMonitor.relabelings       | [RelabelConfigs](https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#relabelconfig) to apply to samples before scraping                           | `[]`                                |
+| metrics.serviceMonitor.additionalLabels  | additional labels for ServiceMonitor                                         | `{}`                                |

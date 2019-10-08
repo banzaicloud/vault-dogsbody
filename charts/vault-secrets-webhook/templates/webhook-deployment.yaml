@@ -21,6 +21,10 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/apiservice-webhook.yaml") . | sha256sum }}
+        {{- if and .Values.metrics.enabled (not .Values.metrics.serviceMonitor.enabled) }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ .Values.metrics.port | quote }}
+        {{- end }}
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -50,16 +54,25 @@ spec:
             - name: TLS_PRIVATE_KEY_FILE
               value: /var/serving-cert/tls.key
             - name: LISTEN_ADDRESS
-              value: ":{{ .Values.service.internalPort}}"
+              value: ":{{ .Values.service.internalPort }}"
             - name: DEBUG
               value: {{ .Values.debug | quote }}
+            {{- if and .Values.metrics.enabled (not (eq .Values.service.internalPort .Values.metrics.port)) }}
+            - name: TELEMETRY_LISTEN_ADDRESS
+              value: ":{{ .Values.metrics.port }}"
+            {{- end }}
             {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: {{ .Values.service.internalPort }}
+            - name: https
+              containerPort: {{ .Values.service.internalPort }}
+            {{- if .Values.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.metrics.port }}
+            {{- end }}
           readinessProbe:
             httpGet:
               scheme: HTTPS

@@ -32,9 +32,13 @@ metrics:
   port: 8443
   serviceMonitor:
     enabled: false
+    scrapeInterval: 30s
     scheme: https
     tlsConfig:
       insecureSkipVerify: true
+    # additionalLabels: []
+    # metricRelabelings: []
+    # relabelings: []
 
 volumes: []
 # - name: vault-tls

@@ -11,10 +11,36 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.externalPort }}
-      targetPort: {{ .Values.service.internalPort }}
+    - name: https
+      port: {{ .Values.service.externalPort }}
+      targetPort: https
       protocol: TCP
-      name: {{ .Values.service.name }}
   selector:
     app.kubernetes.io/name: {{ template "vault-secrets-webhook.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+{{- if .Values.metrics.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+  name: {{ template "vault-secrets-webhook.fullname" . }}-metrics
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "vault-secrets-webhook.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: mutating-webhook
+spec:
+  clusterIP: None
+  ports:
+  - name: metrics
+    port: {{ .Values.metrics.port }}
+    targetPort: metrics
+    protocol: TCP
+  selector:
+    app.kubernetes.io/name: {{ template "vault-secrets-webhook.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  sessionAffinity: None
+  type: ClusterIP
+{{- end }}

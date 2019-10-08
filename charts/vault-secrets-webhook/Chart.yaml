@@ -2,7 +2,7 @@ apiVersion: v1
 appVersion: "0.5.1"
 description: A Helm chart that deploys a mutating admission webhook that configures applications to request env vars from Vault Secrets
 name: vault-secrets-webhook
-version: 0.5.2
+version: 0.6.0
 maintainers:
 - name: Banzai Cloud
   email: info@banzaicloud.com

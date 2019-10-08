@@ -14,14 +14,18 @@ metadata:
     {{- end }}
 spec:
   endpoints:
-  - interval: 30s
+  - interval: {{ .Values.metrics.serviceMonitor.scrapeInterval }}
     port: metrics
     scheme: {{ .Values.metrics.serviceMonitor.scheme }}
-    {{- if .Values.metrics.serviceMonitor.relabellings }}
-    metricrelabelings:
-{{ toYaml .Values.metrics.serviceMonitor.relabellings | indent 6 }}
+    {{- if .Values.metrics.serviceMonitor.metricRelabelings }}
+    metricRelabelings:
+{{ toYaml .Values.metrics.serviceMonitor.metricRelabelings | indent 6 }}
     {{- end }}
-    {{- if .Values.metrics.serviceMonitor.tlsConfig }}
+    {{- if .Values.metrics.serviceMonitor.relabelings }}
+    relabelings:
+{{ toYaml .Values.metrics.serviceMonitor.relabelings | indent 6 }}
+    {{- end }}
+    {{- if and .Values.metrics.serviceMonitor.tlsConfig }}
     tlsConfig:
 {{ toYaml .Values.metrics.serviceMonitor.tlsConfig | indent 6 }}
     {{- end }}
@@ -30,28 +34,4 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ template "vault-secrets-webhook.name" . }}
       app.kubernetes.io/instance: "{{ .Release.Name }}"
----
-apiVersion: v1
-kind: Service
-metadata:
-  annotations:
-  name: {{ template "vault-secrets-webhook.fullname" . }}-metrics
-  labels:
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ template "vault-secrets-webhook.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/component: mutating-webhook
-spec:
-  clusterIP: None
-  ports:
-  - name: metrics
-    port: {{ .Values.metrics.port }}
-    protocol: TCP
-    targetPort: {{ .Values.metrics.port }}
-  selector:
-    app.kubernetes.io/name: {{ template "vault-secrets-webhook.name" . }}
-    app.kubernetes.io/instance: "{{ .Release.Name }}"
-  sessionAffinity: None
-  type: ClusterIP
 {{- end }}
