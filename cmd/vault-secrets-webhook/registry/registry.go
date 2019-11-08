@@ -50,11 +50,16 @@ type Registry struct {
 // NewRegistry creates and initializes registry
 func NewRegistry() ImageRegistry {
 	var r *Registry = &Registry{}
+
 	logger = log.New()
 	if viper.GetBool("enable_json_log") {
 		logger.SetFormatter(&log.JSONFormatter{})
 	}
-	r.imageCache = NewInMemoryImageCache()
+
+	imageCacheStorage := viper.GetString("registry_cache_storage")
+	r.imageCache = NewImageCache(imageCacheStorage, &ImageCacheOptions{
+		DigestOnly: viper.GetBool("registry_cache_digest_only"),
+	})
 	return r
 }
 
@@ -93,7 +98,7 @@ func (r *Registry) GetImageConfig(
 
 // GetImageBlob download image blob from registry
 func getImageBlob(container ContainerInfo) (*imagev1.ImageConfig, error) {
-	imageName, reference := parseContainerImage(container.Image)
+	imageName, reference := ParseContainerImage(container.Image)
 
 	registrySkipVerify := viper.GetBool("registry_skip_verify")
 
@@ -136,11 +141,11 @@ func getImageBlob(container ContainerInfo) (*imagev1.ImageConfig, error) {
 	return &imageMetadata.Config, nil
 }
 
-// parseContainerImage returns image and reference
-func parseContainerImage(image string) (string, string) {
+// ParseContainerImage returns image and reference
+func ParseContainerImage(image string) (string, string) {
 	var split []string
 
-	if strings.Contains(image, "@") {
+	if IsImageNameWithDigest(image) {
 		split = strings.SplitN(image, "@", 2)
 	} else {
 		split = strings.SplitN(image, ":", 2)
@@ -156,7 +161,12 @@ func parseContainerImage(image string) (string, string) {
 	return imageName, reference
 }
 
-// K8s structure keeps information retrieved from POD definition
+// IsImageNameWithDigest check that image name contains digest as reference
+func IsImageNameWithDigest(image string) bool {
+	return strings.Contains(image, "@")
+}
+
+// ContainerInfo K8s structure keeps information retrieved from POD definition
 type ContainerInfo struct {
 	clientset        kubernetes.Interface
 	Namespace        string
@@ -231,7 +241,8 @@ func (k *ContainerInfo) parseDockerConfig(dockerCreds DockerCreds) (bool, error)
 	return false, nil
 }
 
-func (k *ContainerInfo) fixDockerHubImage(image string) string {
+// FixDockerHubImage to fix RegistryAddress and RegistryName for images from Docker Hub
+func (k *ContainerInfo) FixDockerHubImage(image string) string {
 	slash := strings.Index(image, "/")
 	if slash == -1 { // Is it a DockerHub library repository?
 		image = "index.docker.io/library/" + image
@@ -269,7 +280,7 @@ func (k *ContainerInfo) checkImagePullSecret(namespace string, secret string) (b
 // Collect reads information from k8s and load them into the structure
 func (k *ContainerInfo) Collect(container *corev1.Container, podSpec *corev1.PodSpec) error {
 
-	k.Image = k.fixDockerHubImage(container.Image)
+	k.Image = k.FixDockerHubImage(container.Image)
 
 	var err error
 	found := false

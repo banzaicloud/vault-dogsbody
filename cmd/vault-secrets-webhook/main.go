@@ -915,6 +915,8 @@ func init() {
 	viper.SetDefault("registry_skip_verify", "false")
 	viper.SetDefault("debug", "false")
 	viper.SetDefault("enable_json_log", "false")
+	viper.SetDefault("registry_cache_storage", "inmemory")
+	viper.SetDefault("registry_cache_digest_only", "false")
 	viper.AutomaticEnv()
 
 	logger = log.New()

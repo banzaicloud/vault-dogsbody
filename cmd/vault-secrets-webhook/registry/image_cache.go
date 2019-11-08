@@ -15,7 +15,7 @@
 package registry
 
 import (
-	"sync"
+	"strings"
 
 	imagev1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
@@ -26,30 +26,25 @@ type ImageCache interface {
 	Put(image string, imageConfig *imagev1.ImageConfig)
 }
 
-// InMemoryImageCache Concrete mutex-guarded cache
-type InMemoryImageCache struct {
-	mutex sync.Mutex
-	cache map[string]imagev1.ImageConfig
+// ImageCacheOptions additional caching options
+type ImageCacheOptions struct {
+	// DigestOnly used for more sensitive caching, when you are using same
+	// tags for Docker-images that can change as can change the entrypoint.
+	//
+	// Setting as `true` may increase network traffic on Docker Registry.
+	DigestOnly bool
 }
 
-// NewInMemoryImageCache return new mutex guarded cache
-func NewInMemoryImageCache() ImageCache {
-	return &InMemoryImageCache{cache: map[string]imagev1.ImageConfig{}}
-}
-
-// Get image from cache
-func (c *InMemoryImageCache) Get(image string) *imagev1.ImageConfig {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	if imageConfig, ok := c.cache[image]; ok {
-		return &imageConfig
+// NewImageCache returns cache by storage name
+func NewImageCache(storage string, opts *ImageCacheOptions) ImageCache {
+	if opts == nil {
+		opts = &ImageCacheOptions{}
 	}
-	return nil
-}
-
-// Put image into cache
-func (c *InMemoryImageCache) Put(image string, imageConfig *imagev1.ImageConfig) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	c.cache[image] = *imageConfig
+	switch strings.ToLower(storage) {
+	case "none":
+		return NewNoneImageCache()
+	case "inmemory":
+		return NewInMemoryImageCache(opts)
+	}
+	return NewInMemoryImageCache(opts)
 }
