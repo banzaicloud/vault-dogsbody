@@ -30,6 +30,7 @@ import (
 	"github.com/banzaicloud/bank-vaults/pkg/kv/gcs"
 	"github.com/banzaicloud/bank-vaults/pkg/kv/hsm"
 	"github.com/banzaicloud/bank-vaults/pkg/kv/k8s"
+	"github.com/banzaicloud/bank-vaults/pkg/kv/k8srestapi"
 	"github.com/banzaicloud/bank-vaults/pkg/kv/multi"
 	"github.com/banzaicloud/bank-vaults/pkg/kv/s3"
 	kvvault "github.com/banzaicloud/bank-vaults/pkg/kv/vault"
@@ -231,6 +232,21 @@ func kvStoreForConfig(cfg *viper.Viper) (kv.Service, error) {
 		}
 
 		return k8s, nil
+
+	case cfgModeValueK8SWithRestAPI:
+		k8srest, err := k8srestapi.New(
+			cfg.GetString(cfgK8SWithRestAPINamespace),
+			cfg.GetString(cfgK8SWithRestAPISecret),
+			cfg.GetString(cfgK8SWithRestAPIKeyIdentifier),
+			cfg.GetString(cfgK8SWithRestAPIEncryptionUrl),
+			cfg.GetString(cfgK8SWithRestAPIDecryptionUrl),
+		)
+
+		if err != nil {
+			return nil, errors.Wrap(err, "error creating K8SIBMDP Secret kv store")
+		}
+
+		return k8srest, nil
 
 	// BANK_VAULTS_HSM_PIN=banzai bank-vaults unseal --init --mode hsm-k8s --k8s-secret-name hsm --k8s-secret-namespace default --hsm-slot-id 0
 	case cfgModeValueHSMK8S:

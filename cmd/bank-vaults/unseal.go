@@ -54,6 +54,7 @@ from one of the followings:
 - AWS KMS keyring (backed by S3)
 - Azure Key Vault
 - Alibaba KMS (backed by OSS)
+- Kubernetes Secrets With Encryption and Decryption using Third Party REST Call for Example DataPower
 - Kubernetes Secrets (should be used only for development purposes)`,
 	Run: func(cmd *cobra.Command, args []string) {
 		appConfig.BindPFlag(cfgUnsealPeriod, cmd.PersistentFlags().Lookup(cfgUnsealPeriod))           // nolint

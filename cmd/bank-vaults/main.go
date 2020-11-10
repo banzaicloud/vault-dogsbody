@@ -42,6 +42,7 @@ const cfgModeValueHSMK8S = "hsm-k8s"
 const cfgModeValueHSM = "hsm"
 const cfgModeValueDev = "dev"
 const cfgModeValueFile = "file"
+const cfgModeValueK8SWithRestAPI = "k8s-with-restapi"
 
 const cfgGoogleCloudKMSProject = "google-cloud-kms-project"
 const cfgGoogleCloudKMSLocation = "google-cloud-kms-location"
@@ -87,6 +88,12 @@ const cfgHSMPin = "hsm-pin"
 const cfgHSMKeyLabel = "hsm-key-label"
 
 const cfgFilePath = "file-path"
+
+const cfgK8SWithRestAPINamespace = "k8s-with-restapi-secret-namespace"
+const cfgK8SWithRestAPISecret = "k8s-with-restapi-secret-name" // nolint:gosec
+const cfgK8SWithRestAPIKeyIdentifier = "k8s-with-restapi-keyidname"
+const cfgK8SWithRestAPIEncryptionUrl = "k8s-with-restapi-encryption-url"
+const cfgK8SWithRestAPIDecryptionUrl = "k8s-with-restapi-decryption-url"
 
 // We need to pre-create a value and bind the the flag to this until
 // https://github.com/spf13/viper/issues/608 gets fixed.
@@ -157,7 +164,8 @@ func init() {
 						'%s' => Kubernetes Secrets encrypted with HSM;
 						'%s' => HSM object on device, using HSM encryption;
 						'%s' => Dev (vault server -dev) mode
-						'%s' => File mode`,
+						'%s' => File mode
+						'%s' => K8s Secret with REST API Call for Encryption/Decryption`,
 			cfgModeValueGoogleCloudKMSGCS,
 			cfgModeValueAWSKMS3,
 			cfgModeValueAzureKeyVault,
@@ -168,6 +176,7 @@ func init() {
 			cfgModeValueHSM,
 			cfgModeValueDev,
 			cfgModeValueFile,
+			cfgModeValueK8SWithRestAPI,
 		),
 	)
 
@@ -233,6 +242,13 @@ func init() {
 
 	// File flags
 	configStringVar(cfgFilePath, "", "The path prefix of the files where to store values in")
+
+	// K8S With REST API flags
+	configStringVar(cfgK8SWithRestAPINamespace, "", "The namespace of the K8S Secret to store values in")
+	configStringVar(cfgK8SWithRestAPISecret, "", "The name of the K8S Secret to store values in")
+	configStringVar(cfgK8SWithRestAPIKeyIdentifier, "", "The keyid name of encryption and decrytion service to pass")
+	configStringVar(cfgK8SWithRestAPIEncryptionUrl, "", "The URL of Encrypt API")
+	configStringVar(cfgK8SWithRestAPIDecryptionUrl, "", "The URL of Derypt API")
 }
 
 func main() {
