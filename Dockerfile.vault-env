@@ -1,4 +1,4 @@
-FROM golang:1.16-alpine AS builder
+FROM golang:1.16.6-alpine AS builder
 
 RUN apk add --update --no-cache build-base git mercurial
 
